@@ -6,11 +6,16 @@ package com.kekcom.newsapp;
 import android.net.Uri;
 import android.util.Log;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
@@ -66,6 +71,25 @@ public class NetworkUtils {
         } finally {
             urlConnection.disconnect();
         }
+    }
+
+    public static ArrayList<NewsItem> parseJSON(String json) throws JSONException {
+        ArrayList<NewsItem> result = new ArrayList<>();
+        JSONObject main = new JSONObject(json);
+        JSONArray articles = main.getJSONArray("articles");
+
+        for(int i = 0; i < articles.length(); i++){
+            JSONObject item = articles.getJSONObject(i);
+            String author = item.getString("author");
+            String title = item.getString("title");
+            String description = item.getString("description");
+            String url = item.getString("url");
+            String urlToImage = item.getString("urlToImage");
+            String publishedAt = item.getString("publishedAt");
+            NewsItem article = new NewsItem(author, title, description, url, urlToImage, publishedAt);
+            result.add(article);
+        }
+        return result;
     }
 }
 
