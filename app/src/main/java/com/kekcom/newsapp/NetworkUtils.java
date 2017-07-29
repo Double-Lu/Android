@@ -1,10 +1,6 @@
 package com.kekcom.newsapp;
 
-/**
- * Created by lujac on 6/25/2017.
- */
 import android.net.Uri;
-import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -18,44 +14,30 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-/**
- * These utilities will be used to communicate with the weather servers.
- */
 public class NetworkUtils {
-    public static final String TAG = "NetworkUtils";
-    private static final String BASE_URL = "https://newsapi.org/v1/articles";
 
-    final static String SOURCE_PARAM = "source";
-    private static final String source = "the-next-web";
-    final static String SORTBY_PARAM = "sortBy";
-    private static final String sortby = "latest";
-    final static String APIKEY_PARAM = "apiKey";
-    private static final String apikey = "668c652f589c429ca494d3c5887b66e3";
+    public static final String NEWSAPI_BASE_URL = "https://newsapi.org/v1/articles";
+    public static final String PARAM_SOURCE = "source";
+    public static final String PARAM_SORT = "sortBy";
+    public static final String PARAM_APIKEY = "apiKey";
+    private static String sourceQuery = "the-next-web";
+    private static String sortBy = "latest";
+    private static String apiKey = "668c652f589c429ca494d3c5887b66e3";
 
-    public static URL buildUrl() {
-        Log.d("urltest", "BUILDING...");
-        Uri builtUri = Uri.parse(BASE_URL).buildUpon()
-                .appendQueryParameter(SOURCE_PARAM, source)
-                .appendQueryParameter(SORTBY_PARAM, sortby)
-                .appendQueryParameter(APIKEY_PARAM, apikey)
-                .build();
-
+    public static URL makeURL() {
+        Uri uri = Uri.parse(NEWSAPI_BASE_URL).buildUpon().appendQueryParameter(PARAM_SOURCE, sourceQuery).appendQueryParameter(PARAM_SORT, sortBy).appendQueryParameter(PARAM_APIKEY, apiKey).build();
         URL url = null;
         try {
-            System.out.println("BUILT" + builtUri.toString());
-            Log.d("urltest", "BUILT" + builtUri.toString());
-            url = new URL(builtUri.toString());
+            url = new URL(uri.toString());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
-
-        Log.v(TAG, "Built URI " + url);
-
         return url;
     }
 
     public static String getResponseFromHttpUrl(URL url) throws IOException {
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+
         try {
             InputStream in = urlConnection.getInputStream();
 
@@ -68,28 +50,32 @@ public class NetworkUtils {
             } else {
                 return null;
             }
+
         } finally {
             urlConnection.disconnect();
         }
     }
 
     public static ArrayList<NewsItem> parseJSON(String json) throws JSONException {
-        ArrayList<NewsItem> result = new ArrayList<>();
-        JSONObject main = new JSONObject(json);
-        JSONArray articles = main.getJSONArray("articles");
+        ArrayList<NewsItem> newsItemsList = new ArrayList<NewsItem>();
 
-        for(int i = 0; i < articles.length(); i++){
-            JSONObject item = articles.getJSONObject(i);
-            String author = item.getString("author");
-            String title = item.getString("title");
-            String description = item.getString("description");
-            String url = item.getString("url");
-            String urlToImage = item.getString("urlToImage");
-            String publishedAt = item.getString("publishedAt");
-            NewsItem article = new NewsItem(author, title, description, url, urlToImage, publishedAt);
-            result.add(article);
+        JSONObject mainJSON = new JSONObject(json);
+        JSONArray articleList = mainJSON.getJSONArray("articles");
+
+        for (int i = 0; i < articleList.length(); i++) {
+            JSONObject article = articleList.getJSONObject(i);
+
+            String author = article.getString("author");
+            String title = article.getString("title");
+            String description = article.getString("description");
+            String url = article.getString("url");
+            String urlToImage = article.getString("urlToImage");
+            String publishedAt = article.getString("publishedAt");
+
+            NewsItem newsItem = new NewsItem(author, title, description, url, urlToImage, publishedAt);
+            newsItemsList.add(newsItem);
         }
-        return result;
+
+        return newsItemsList;
     }
 }
-

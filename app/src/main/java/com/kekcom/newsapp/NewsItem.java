@@ -1,10 +1,7 @@
 package com.kekcom.newsapp;
 
-/**
- * Created by lujac on 6/28/2017.
- */
-
 public class NewsItem {
+
     private String author;
     private String title;
     private String description;
@@ -12,12 +9,28 @@ public class NewsItem {
     private String urlToImage;
     private String publishedAt;
 
-    public NewsItem(String author, String title, String description, String url, String urlToImage, String publishedAt){
+    public NewsItem(String author, String title, String description, String url, String urlToImage, String publishedAt) {
         this.author = author;
         this.title = title;
         this.description = description;
         this.url = url;
         this.urlToImage = urlToImage;
+        this.publishedAt = publishedAt;
+    }
+
+    public String getUrlToImage() {
+        return urlToImage;
+    }
+
+    public void setUrlToImage(String urlToImage) {
+        this.urlToImage = urlToImage;
+    }
+
+    public String getPublishedAt() {
+        return publishedAt;
+    }
+
+    public void setPublishedAt(String publishedAt) {
         this.publishedAt = publishedAt;
     }
 
@@ -51,21 +64,5 @@ public class NewsItem {
 
     public void setUrl(String url) {
         this.url = url;
-    }
-
-    public String getUrlToImage() {
-        return urlToImage;
-    }
-
-    public void setUrlToImage(String urlToImage) {
-        this.urlToImage = urlToImage;
-    }
-
-    public String getPublishedAt() {
-        return publishedAt;
-    }
-
-    public void setPublishedAt(String publishedAt) {
-        this.publishedAt = publishedAt;
     }
 }
