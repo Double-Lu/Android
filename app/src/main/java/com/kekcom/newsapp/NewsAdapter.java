@@ -1,48 +1,36 @@
 package com.kekcom.newsapp;
 
-/**
- * Created by lujac on 6/28/2017.
- */
-
 import android.content.Context;
+import android.database.Cursor;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
-import android.support.v7.widget.RecyclerView;
 
-import java.util.ArrayList;
-
-
-/**
- * {@link NewsAdapter} exposes a list of weather forecasts to a
- * {@link android.support.v7.widget.RecyclerView}
- */
+import com.squareup.picasso.Picasso;
 
 public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.ItemHolder>{
 
-    private RecyclerView rv;
-    private ArrayList<NewsItem> data;
-    ItemClickListener listener;
+    private Cursor cursor;
+    public ItemClickListener listener;
+    private Context context;
 
-    public NewsAdapter(ItemClickListener listener){
+    public NewsAdapter(Cursor cursor, ItemClickListener listener){
+        this.cursor = cursor;
         this.listener = listener;
-    }
-
-    public interface ItemClickListener {
-        void onItemClick(int clickedItemIndex);
     }
 
     @Override
     public ItemHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        Context context = parent.getContext();
+        context = parent.getContext();
         LayoutInflater inflater = LayoutInflater.from(context);
-        boolean shouldAttachToParentImmediately = false;
 
-        View view = inflater.inflate(R.layout.item, parent, shouldAttachToParentImmediately);
-        ItemHolder holder = new ItemHolder(view);
+        View view = inflater.inflate(R.layout.item, parent, false);
+        ItemHolder itemHolder = new ItemHolder(view);
 
-        return holder;
+        return itemHolder;
     }
 
     @Override
@@ -52,38 +40,48 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.ItemHolder>{
 
     @Override
     public int getItemCount() {
-        return data.size();
+        return cursor.getCount();
+    }
+
+    public interface ItemClickListener{
+        void onItemClick(Cursor cursor, int clickedItemIndex);
     }
 
     class ItemHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+
         TextView title;
         TextView description;
         TextView time;
+        ImageView img;
 
-        ItemHolder(View view){
-            super(view);
-            title = (TextView)view.findViewById(R.id.title);
-            description = (TextView)view.findViewById(R.id.description);
-            time = (TextView)view.findViewById(R.id.time);
-            view.setOnClickListener(this);
+        public ItemHolder(View itemView) {
+            super(itemView);
+
+            title = (TextView) itemView.findViewById(R.id.articleTitle);
+            description = (TextView) itemView.findViewById(R.id.articleDescription);
+            time = (TextView) itemView.findViewById(R.id.articleTime);
+            img = (ImageView) itemView.findViewById(R.id.articleImg);
+
+            itemView.setOnClickListener(this);
         }
 
-        public void bind(int pos){
-            NewsItem item = data.get(pos);
-            title.setText(item.getTitle());
-            description.setText(item.getDescription());
-            time.setText(item.getPublishedAt());
+        public void bind(int position){
+            cursor.moveToPosition(position);
+            title.setText(cursor.getString(cursor.getColumnIndex(Contract.TABLE_ARTICLES.COLUMN_NAME_TITLE)));
+            description.setText(cursor.getString(cursor.getColumnIndex(Contract.TABLE_ARTICLES.COLUMN_NAME_DESCRIPTION)));
+            time.setText(cursor.getString(cursor.getColumnIndex(Contract.TABLE_ARTICLES.COLUMN_NAME_PUBLISHDATE)));
+
+            String url = cursor.getString(cursor.getColumnIndex(Contract.TABLE_ARTICLES.COLUMN_NAME_URLTOIMAGE));
+            //for recyclerview
+            Picasso.with(context).load(url).into(img);
         }
 
         @Override
         public void onClick(View v) {
-            int pos = getAdapterPosition();
-            listener.onItemClick(pos);
-        }
-    }
 
-    public void setNewsData(ArrayList<NewsItem> data) {
-        this.data = data;
-        notifyDataSetChanged();
+            int position = getAdapterPosition();
+            listener.onItemClick(cursor, position);
+
+        }
     }
 }
